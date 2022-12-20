@@ -1,0 +1,92 @@
+<html>
+
+<body>
+<canvas id="game-of-life"></canvas>
+
+<script>
+const width = 50; // width of the grid
+const height = 50; // height of the grid
+const cellSize = 10; // size of each cell in pixels
+
+// create an empty grid
+let grid = [];
+for (let i = 0; i < width; i++) {
+  grid[i] = [];
+  for (let j = 0; j < height; j++) {
+    grid[i][j] = 0;
+  }
+}
+
+grid[0][1] = 1;
+grid[1][2] = 1;
+grid[2][0] = 1;
+grid[2][1] = 1;
+grid[2][2] = 1;
+
+// initialize the canvas
+const canvas = document.getElementById("game-of-life");
+const ctx = canvas.getContext("2d");
+canvas.width = width * cellSize;
+canvas.height = height * cellSize;
+
+// draw the grid
+function drawGrid() {
+  for (let i = 0; i < width; i++) {
+    for (let j = 0; j < height; j++) {
+      ctx.fillStyle = grid[i][j] === 0 ? "white" : "black";
+      ctx.fillRect(i * cellSize, j * cellSize, cellSize, cellSize);
+    }
+  }
+}
+
+// apply the rules of the Game of Life to a cell
+function applyRules(x, y) {
+  let liveNeighbors = 0;
+
+  // count the number of live neighbors
+  for (let i = -1; i <= 1; i++) {
+    for (let j = -1; j <= 1; j++) {
+      if (i === 0 && j === 0) continue; // skip the current cell
+      if (x + i >= 0 && x + i < width && y + j >= 0 && y + j < height) {
+        liveNeighbors += grid[x + i][y + j];
+      }
+    }
+  }
+
+  // apply the rules of the Game of Life
+  if (grid[x][y] === 0 && liveNeighbors === 3) {
+    return 1; // cell is born
+  } else if (grid[x][y] === 1 && (liveNeighbors < 2 || liveNeighbors > 3)) {
+    return 0; // cell dies
+  } else {
+    return grid[x][y]; // cell remains unchanged
+  }
+}
+
+// advance the simulation by one step
+function step() {
+  // create a new grid to store the next state
+  let nextGrid = [];
+  for (let i = 0; i < width; i++) {
+    nextGrid[i] = [];
+    for (let j = 0; j < height; j++) {
+      nextGrid[i][j] = applyRules(i, j);
+    }
+  }
+
+  // copy the next state to the current state
+  grid = nextGrid;
+
+  // draw the grid
+  drawGrid();
+}
+
+// run the simulation
+setInterval(step, 100); // run the simulation every 100 milliseconds
+
+
+</script>
+
+
+</body>
+</html>
