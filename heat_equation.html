@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<button type="button" style="font-size : 20px" onclick="startProcess()">Start</button>
+<button type="button" style="font-size : 20px" onclick="stopProcess()">Stop</button>
+<button type="button" style="font-size : 20px" onclick="clearProcess()">Clear</button>
+<br>
+<form>
+  <label for="circleSizeIn" style="font-size : 20px">Size of circle:</label>
+  <input type="range" id="circleSizeIn" min="0" max="50" value="5" step="1">
+  <output for="circleSize" id="circleSizeOut">5</output>
+</form>
+
+<form>
+  <label for="circleHeatIn" style="font-size : 20px">Heat of circle:</label>
+  <input type="range" id="circleHeatIn" min="0.0" max="1.0" value="0.8" step="0.01">
+  <output for="circleHeat" id="circleHeatOut">0.8</output>
+</form>
+
+<p id="status" style="font-size : 20px">Not running</p>
+<p id="iternum" style="font-size : 20px">Iteration: 0</p>
+<p id="sum" style="font-size : 20px">Total Heat: 0</p>
+
+<canvas id="myCanvas" width="800" height="800" style="border: 2px solid black;"></canvas>
+
+
+</canvas>
+
+
+<script>
+
+// -------------------------------------- All code below ----------------
+
+let bigwidth = window.innerWidth;
+let bigheight = window.innerHeight;
+console.log(bigwidth, bigheight);
+
+let mainCanvas = "myCanvas";
+let width = 200;
+let height = 150;
+let squareSize = Math.floor(Math.min(bigwidth/width, bigheight/height));
+let circleSize = 5;
+let circleHeat = 1.0;
+let iter = 0;
+
+document.getElementById(mainCanvas).width = width * squareSize;
+document.getElementById(mainCanvas).height = height * squareSize;
+
+// Initialize an empty array
+
+var board = new Float32Array(width * height);
+
+// Control properties of circle.
+
+var circleInput = document.getElementById("circleSizeIn");
+var circleOutput = document.getElementById("circleSizeOut");
+
+circleInput.addEventListener("input", function() {
+  circleOutput.innerHTML = circleInput.value;
+  circleSize = parseFloat(circleInput.value);
+});
+
+var circleInput2 = document.getElementById("circleHeatIn");
+var circleOutput2 = document.getElementById("circleHeatOut");
+
+circleInput2.addEventListener("input", function() {
+  circleOutput2.innerHTML = circleInput2.value;
+  circleHeat = parseFloat(circleInput2.value);
+});
+
+
+// Fill the array with random float values between 0 and 1
+
+function randomizeArray(arr) {
+  for (var i = 0; i < width * height; i++)
+     arr[i] = Math.random();
+}
+
+// Clear the array.
+
+function clearArray(arr) {
+  for (var i = 0; i < width * height; i++)
+     arr[i] = 0.0;
+}
+
+// Place a circle at specified point.
+
+function placeCircle(arr, x, y, r) {
+   for (var i = -r; i <= r; i++) 
+      for (var j = -r; j <= r; j++) 
+         if (i * i + j * j <= r * r) {
+            x1 = i + x;
+            y1 = j + y;
+            if (x1 > 0 && x1 < width-1 && y1 > 0 && y1 < height-1) {
+               arr[x1 + width * y1] = circleHeat;               
+            }
+         }
+}
+
+function plotArray(arr) {
+  // Get the canvas element
+  var canvas = document.getElementById(mainCanvas);
+  var ctx = canvas.getContext("2d");
+  var total = 0.0;
+  // Clear the canvas
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Iterate through the array and draw each square
+  for (var j = 0; j < height; j++) {
+    for (var i = 0; i < width; i++) {
+      var val = arr[i + j * width];
+
+      // Set the fill style based on the value of the array element
+	  color = Math.floor(val * 256);
+	  if (color < 0) color = 0;
+	  if (color > 255) color = 255;
+	  color = 255 - color;
+      ctx.fillStyle = `rgb(${color}, ${color}, ${color})`;
+
+      // Draw the square
+      ctx.fillRect(i * squareSize, j * squareSize, squareSize, squareSize);
+	  total += val;
+    }
+  }
+  document.getElementById("sum").innerHTML = "Total heat: " + total;
+}
+
+// One step in the heat equation.
+
+alpha = 0.5
+dt = 0.003
+dx = dy = 0.1 
+
+function heatEquation(u, alpha, dt, dx, dy) {
+   let un = u.slice();
+   let beta1 = dt / (dx * dx) * alpha;
+   let beta2 = dt / (dy * dy);
+   let sum = 0.0;
+   for (let j = 1; j < height - 1; j++) {
+      for (let i = 1; i < width - 1; i++) {
+         let idx = i + j * width;
+         u[idx] += beta1 * (un[idx + 1] - 2 * un[idx] + un[idx - 1]) + 
+                   beta2 * (un[idx + width] - 2 * un[idx] + un[idx - width]);
+		 sum += u[idx];
+      }
+   } 
+}
+
+// Update the canvas via heat equation.
+
+function update() {
+   heatEquation(board, alpha, dt, dx, dy);
+   plotArray(board);
+   iter++;
+   document.getElementById("iternum").innerHTML = "Iteration: " + iter;
+}
+
+// Add circles.
+
+var canvas = document.getElementById(mainCanvas);
+canvas.addEventListener("mousedown", function(event) {
+  var rect = canvas.getBoundingClientRect();
+  var x = event.clientX - rect.left;
+  var y = event.clientY - rect.top;
+  i = Math.floor(x/squareSize);
+  j = Math.floor(y/squareSize);
+  placeCircle(board, i, j, circleSize);
+  plotArray(board);
+});
+
+clearArray(board);
+plotArray(board);
+
+function startProcess() {
+   intervalId = setInterval(function() {
+      update();// your process code
+      document.getElementById("status").innerHTML = "Running";
+   }, 10);
+}
+
+function stopProcess() {
+   clearInterval(intervalId);
+   document.getElementById("status").innerHTML = "Not running";
+}
+
+function clearProcess() {
+   clearArray(board);
+   plotArray(board);
+   iter = 0;
+   document.getElementById("iternum").innerHTML = "Iteration: " + iter;
+}
+
+</script>
+
+</body>
+
+</html>
