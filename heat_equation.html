@@ -135,7 +135,7 @@ dx = dy = 0.1
 function heatEquation(u, alpha, dt, dx, dy) {
    let un = u.slice();
    let beta1 = dt / (dx * dx) * alpha;
-   let beta2 = dt / (dy * dy);
+   let beta2 = dt / (dy * dy) * alpha;
    let sum = 0.0;
    for (let j = 1; j < height - 1; j++) {
       for (let i = 1; i < width - 1; i++) {
