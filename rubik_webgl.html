@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>WebGL Cube</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r118/three.min.js"></script>
+</head>
+<body>
+  <script>
+
+// Define the individual cubes.
+
+function define_cubes() {
+	var materials = [
+		new THREE.MeshLambertMaterial({ color: 0xff0000 }), // red
+		new THREE.MeshLambertMaterial({ color: 0x00ff00 }), // green
+		new THREE.MeshLambertMaterial({ color: 0x0000ff }), // blue
+		new THREE.MeshLambertMaterial({ color: 0xffff00 }), // yellow
+		new THREE.MeshLambertMaterial({ color: 0xff00ff }), // magenta
+		new THREE.MeshLambertMaterial({ color: 0x00ffff }), // cyan
+		new THREE.MeshLambertMaterial({ color: 0x000000 })  // black
+	];
+	var size = 0.92;
+	var line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0xffffff }));
+	var group = new THREE.Group();
+
+	for(var i=-1; i<=1; i++)
+		for(var j=-1; j<=1; j++)
+			for(var k=-1; k<=1; k++) {
+				var cube = new THREE.BoxGeometry(size, size, size);
+				for (var i1 = 0; i1 < cube.faces.length; i1 += 2) {
+					var j1 = i1 / 2;
+					cube.faces[i1].materialIndex = j1;
+					cube.faces[i1 + 1].materialIndex = j1;
+				}
+				var edges = new THREE.EdgesGeometry(cube);
+				var cube2 = new THREE.Mesh(cube, materials);
+				cube2.add(line);
+				cube2.position.set(i, j, k);
+				group.add(cube2);
+			}
+
+	return group;
+}
+
+
+const steps = 20;
+const rotate_angle = Math.PI / (2 * steps);
+
+function rotate_face(cube_list, scene, camera, indices, rotation, pivot) {
+   let frame_count = 0;
+   function render() {
+   
+   if (frame_count >= steps) return;
+
+      frame_count++;
+      
+      for(var i = 0; i < indices.length; i++) {
+         let cube = cube_list[indices[i]];
+         
+         cube.position.sub(pivot);
+         cube.applyMatrix4(rotation);
+         cube.position.add(pivot);
+      }
+      renderer.render(scene, camera);
+      
+      requestAnimationFrame(render);
+   }
+   render();
+}
+
+
+function rotate_1(all_cubes, scene, camera) {
+   let pivot = new THREE.Vector3(-1, 0, 0);
+   let rotation = new THREE.Matrix4().makeRotationX(rotate_angle);
+   let cube_list = all_cubes.children;
+   
+   var indices = []
+   for(var i = 0; i < cube_list.length; i++)
+      if (cube_list[i].position.x < -0.99)
+         indices.push(i);
+   
+   rotate_face(all_cubes.children, scene, camera, indices, rotation, pivot);
+}
+
+function rotate_2(all_cubes, scene, camera) {
+   let pivot = new THREE.Vector3(-1, 0, 0);
+   let rotation = new THREE.Matrix4().makeRotationX(-rotate_angle);
+   let cube_list = all_cubes.children;
+
+   var indices = []
+   for(var i = 0; i < cube_list.length; i++)
+      if (cube_list[i].position.x < -0.99)
+         indices.push(i);
+   
+   rotate_face(all_cubes.children, scene, camera, indices, rotation, pivot);
+}
+
+function rotate_3(all_cubes, scene, camera) {
+   let pivot = new THREE.Vector3(+1, 0, 0);
+   let rotation = new THREE.Matrix4().makeRotationX(rotate_angle);
+   let cube_list = all_cubes.children;
+
+   var indices = []
+   for(var i = 0; i < cube_list.length; i++)
+      if (cube_list[i].position.x > 0.99)
+         indices.push(i);
+
+   rotate_face(all_cubes.children, scene, camera, indices, rotation, pivot);
+}
+
+function rotate_4(all_cubes, scene, camera) {
+   let pivot = new THREE.Vector3(+1, 0, 0);
+   let rotation = new THREE.Matrix4().makeRotationX(-rotate_angle);
+   let cube_list = all_cubes.children;
+
+   var indices = []
+   for(var i = 0; i < cube_list.length; i++)
+      if (cube_list[i].position.x > 0.99)
+         indices.push(i);
+
+   rotate_face(all_cubes.children, scene, camera, indices, rotation, pivot);
+}
+
+
+
+function rotate_5(all_cubes, scene, camera) {
+   let pivot = new THREE.Vector3(0, -1, 0);
+   let rotation = new THREE.Matrix4().makeRotationY(rotate_angle);
+   let cube_list = all_cubes.children;
+
+   var indices = []
+   for(var i = 0; i < cube_list.length; i++)
+      if (cube_list[i].position.y < -0.99)
+         indices.push(i);
+
+   rotate_face(all_cubes.children, scene, camera, indices, rotation, pivot);
+}
+
+function rotate_6(all_cubes, scene, camera) {
+   let pivot = new THREE.Vector3(0, -1, 0);
+   let rotation = new THREE.Matrix4().makeRotationY(-rotate_angle);
+   let cube_list = all_cubes.children;
+
+   var indices = []
+   for(var i = 0; i < cube_list.length; i++)
+      if (cube_list[i].position.y < -0.99)
+         indices.push(i);
+
+   rotate_face(all_cubes.children, scene, camera, indices, rotation, pivot);
+}
+
+function rotate_7(all_cubes, scene, camera) {
+   let pivot = new THREE.Vector3(0, +1, 0);
+   let rotation = new THREE.Matrix4().makeRotationY(rotate_angle);
+   let cube_list = all_cubes.children;
+
+   var indices = []
+   for(var i = 0; i < cube_list.length; i++)
+      if (cube_list[i].position.y > 0.99)
+         indices.push(i);
+
+   rotate_face(all_cubes.children, scene, camera, indices, rotation, pivot);
+}
+
+function rotate_8(all_cubes, scene, camera) {
+   let pivot = new THREE.Vector3(0, +1, 0);
+   let rotation = new THREE.Matrix4().makeRotationY(-rotate_angle);
+   let cube_list = all_cubes.children;
+
+   var indices = []
+   for(var i = 0; i < cube_list.length; i++)
+      if (cube_list[i].position.y > 0.99)
+         indices.push(i);
+
+   rotate_face(all_cubes.children, scene, camera, indices, rotation, pivot);
+}
+
+
+
+function rotate_9(all_cubes, scene, camera) {
+   let pivot = new THREE.Vector3(0, 0, -1);
+   let rotation = new THREE.Matrix4().makeRotationZ(rotate_angle);
+   let cube_list = all_cubes.children;
+
+   var indices = []
+   for(var i = 0; i < cube_list.length; i++)
+      if (cube_list[i].position.z < -0.99)
+         indices.push(i);
+
+   rotate_face(all_cubes.children, scene, camera, indices, rotation, pivot);
+}
+
+function rotate_10(all_cubes, scene, camera) {
+   let pivot = new THREE.Vector3(0, 0, -1);
+   let rotation = new THREE.Matrix4().makeRotationZ(-rotate_angle);
+   let cube_list = all_cubes.children;
+
+   var indices = []
+   for(var i = 0; i < cube_list.length; i++)
+      if (cube_list[i].position.z < -0.99)
+         indices.push(i);
+   
+   rotate_face(all_cubes.children, scene, camera, indices, rotation, pivot);
+}
+
+function rotate_11(all_cubes, scene, camera) {
+   let pivot = new THREE.Vector3(0, 0, +1);
+   let rotation = new THREE.Matrix4().makeRotationZ(rotate_angle);
+   let cube_list = all_cubes.children;
+
+   var indices = []
+   for(var i = 0; i < cube_list.length; i++)
+      if (cube_list[i].position.z > 0.99)
+         indices.push(i);
+
+   rotate_face(all_cubes.children, scene, camera, indices, rotation, pivot);
+}
+
+function rotate_12(all_cubes, scene, camera) {
+   let pivot = new THREE.Vector3(0, 0, +1);
+   let rotation = new THREE.Matrix4().makeRotationZ(-rotate_angle);
+   let cube_list = all_cubes.children;
+
+   var indices = []
+   for(var i = 0; i < cube_list.length; i++)
+      if (cube_list[i].position.z > 0.99)
+         indices.push(i);
+
+   rotate_face(all_cubes.children, scene, camera, indices, rotation, pivot);
+}
+
+
+// Create the buttons for manipulating the cube.
+
+function define_buttons() {
+   // Create a cylinder with radius 0.5 and height 
+   var cylinderGeometry = new THREE.CylinderBufferGeometry(0.4, 0.4, 0.1);
+	var group = new THREE.Group();
+
+   cylinderGeometry.position = 0;
+
+   // Create a cylinder mesh
+   for(var i = 0; i < 6; i++) {
+      var button = new THREE.Mesh(cylinderGeometry, new THREE.MeshBasicMaterial({ color: 0xffffff }));
+      button.position.x = 0;
+      button.position.y = 1.55;
+      button.position.z = 0;
+      button.name = i+1;
+      
+      group.add(button);
+   }
+   let rotation1 = new THREE.Matrix4().makeRotationZ(Math.PI / 2);
+   group.children[1].applyMatrix4(rotation1);
+   let rotation2 = new THREE.Matrix4().makeRotationZ(Math.PI);
+   group.children[2].applyMatrix4(rotation2);
+   let rotation3 = new THREE.Matrix4().makeRotationZ(- Math.PI / 2);
+   group.children[3].applyMatrix4(rotation3);
+   let rotation4 = new THREE.Matrix4().makeRotationX(Math.PI / 2);
+   group.children[4].applyMatrix4(rotation4);
+   let rotation5 = new THREE.Matrix4().makeRotationX(- Math.PI / 2);
+   group.children[5].applyMatrix4(rotation5);
+   
+   return group;
+}
+
+	
+// Set up the scene, camera, and renderer
+
+const width = Math.min(window.innerWidth, window.innerHeight) - 50;
+const height = Math.min(window.innerWidth, window.innerHeight) - 50;
+
+var scene = new THREE.Scene();
+var camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000);
+var renderer = new THREE.WebGLRenderer();
+
+function define_scene(scene) {
+   var all_cubes = define_cubes();
+   var all_buttons = define_buttons();
+   var all_objects = new THREE.Group();
+   all_objects.add(all_cubes);
+   all_objects.add(all_buttons);
+   scene.add(all_objects);
+   
+   return all_objects;
+}
+
+function add_light(scene) {
+   var light = new THREE.AmbientLight( 0xC0C0C0 );
+   scene.add( light );
+}
+
+function place_camera(camera) {
+   camera.position.z = 6;
+}
+
+renderer.setSize(width, height);
+document.body.appendChild(renderer.domElement);
+
+// Construct the scene.
+
+all_objects = define_scene(scene);
+add_light(scene);
+place_camera(camera);
+
+all_objects.rotation.x = 0.4;
+all_objects.rotation.y = 0.5;
+
+// Render the scene
+renderer.render(scene, camera);
+
+
+// Global variable to keep track of whether the cursor is over any button.
+let isOverCube = 0;
+
+// Raycaster object to check if cursor is over the cube
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+
+// Listen for mouse move event
+document.addEventListener('mousemove', onDocumentMouseMove, false);
+
+document.addEventListener("wheel", function(event) {
+  var all_cubes = all_objects.children[0];
+  
+  if (event.deltaY < 0) {
+    switch (isOverCube) {
+       case 1: rotate_7(all_cubes, scene, camera); break;
+       case 2: rotate_2(all_cubes, scene, camera); break;
+       case 3: rotate_6(all_cubes, scene, camera); break;
+       case 4: rotate_3(all_cubes, scene, camera); break;
+       case 5: rotate_11(all_cubes, scene, camera); break;
+       case 6: rotate_10(all_cubes, scene, camera); break;
+    }
+  } else if (event.deltaY > 0) {
+  
+    switch (isOverCube) {
+       case 1: rotate_8(all_cubes, scene, camera); break;
+       case 2: rotate_1(all_cubes, scene, camera); break;
+       case 3: rotate_5(all_cubes, scene, camera); break;
+       case 4: rotate_4(all_cubes, scene, camera); break;
+       case 5: rotate_12(all_cubes, scene, camera); break;
+       case 6: rotate_9(all_cubes, scene, camera); break;
+    }
+    
+  }
+});
+
+function onDocumentMouseMove(event) {
+  // Update the mouse variable
+  mouse.x = (event.clientX / width) * 2 - 1;
+  mouse.y = -(event.clientY / height) * 2 + 1;
+
+  // Update the raycaster to check for intersections
+  raycaster.setFromCamera(mouse, camera);
+  const intersects = raycaster.intersectObjects(scene.children, true);
+
+  // Check if the cursor is over the cube
+  if (intersects.length > 0 && intersects[0].object.name) {
+      isOverCube = intersects[0].object.name;
+      //console.log(isOverCube);
+  } else
+    isOverCube = 0;
+  
+  // Update the cursor style
+  updateCursor();
+}
+
+
+function updateCursor() {
+  if (isOverCube) {
+    document.body.style.cursor = "pointer";
+  } else {
+    document.body.style.cursor = "default";
+  }
+}
+
+// Add event listener on keydown
+document.addEventListener('keydown', (event) => {
+  var name = event.key;
+  
+  if (name == "ArrowUp") {
+     all_objects.rotation.x -= 0.1;
+     renderer.render(scene, camera);
+  } else if (name == "ArrowDown") {
+     all_objects.rotation.x += 0.1;
+     renderer.render(scene, camera);
+  } else if (name == "ArrowLeft") {
+     all_objects.rotation.y -= 0.1;
+     renderer.render(scene, camera);
+  } else if (name == "ArrowRight") {
+     all_objects.rotation.y += 0.1;
+     renderer.render(scene, camera);
+  }
+}, false);
+
+
+</script>
+</body>
+</html>
