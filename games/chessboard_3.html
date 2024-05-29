@@ -1,0 +1,197 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>6x3 Table</title>
+    <style>
+        table {
+            border-collapse: collapse;
+        }
+        td, th {
+            border: 1px solid black;
+            padding: 0;
+            width: 80px;
+            height: 80px;
+            text-align: center;
+			font-size: 40pt;
+        }
+        .no-border {
+            border: none;
+        }
+    </style>
+</head>
+<body>
+<p style="font-size:30pt">
+Move king to yellow goal.
+</p>
+    <table id = "mytable">
+        <tr>
+            <td id = "2_2"></td>
+            <td id = "2_3"></td>
+            <td id = "2_4"></td>
+            <td id = "2_5"></td>
+        </tr>
+        <tr>
+            <td id = "3_2"></td>
+            <td id = "3_3"></td>
+            <td id = "3_4"></td>
+            <td id = "3_5"></td>
+        </tr>
+        <tr>
+            <td id = "4_2"></td>
+            <td id = "4_3"></td>
+            <td id = "4_4"></td>
+            <td id = "4_5"></td>
+        </tr>
+        <tr>
+            <td id = "5_2">&#x274c</td>
+            <td id = "5_3">&#x274c</td>
+            <td id = "5_4">&#x274c</td>
+            <td id = "5_5" style="background-color:yellow"></td>
+        </tr>
+    </table>
+	
+	<p>
+	<button style="font-size: 30px" onclick="reset_puzzle()" type="button">Reset</button>
+	
+	</p>
+<script>
+
+const BLANK = 0;
+const BISHOP = 1;
+const KNIGHT = 2;
+const ROOK = 3;
+const KING = 4;
+const WALL = 255;
+
+const LENGTH = 8;
+const HEIGHT = 8;
+
+board = []
+for (let j = 0; j < HEIGHT; j++) {
+    board[j] = [];
+    for (let i = 0; i < LENGTH; i++) {
+        board[j][i] = 0;
+    }
+}
+
+// Hightlight cell clicked.
+
+function highlight(y, x) {
+	for(j=0; j<HEIGHT; j++)
+		for(i=0; i<LENGTH; i++)
+			if (board[j][i] == BLANK) {
+				j1 = j;
+				i1 = i;
+			}
+			
+	piece = board[y][x];
+	if (Math.abs(piece) == BISHOP) {
+		if (Math.abs(j1 - y) == 1 && Math.abs(i1 - x) == 1) {
+			board[y][x] = BLANK;
+			board[j1][i1] = piece;
+			draw();
+		}	
+	} else if (Math.abs(piece) == ROOK) {
+		if (Math.abs(j1 - y) + Math.abs(i1 - x) == 1) {
+			board[y][x] = BLANK;
+			board[j1][i1] = piece;
+			draw();
+		}
+	} else if (Math.abs(piece) == KNIGHT) {
+		d1 = Math.abs(j1 - y);
+		d2 = Math.abs(i1 - x);
+		if (d1 + d2 == 3 && d1 > 0 && d2 > 0) {
+			board[y][x] = BLANK;
+			board[j1][i1] = piece;
+			draw();
+		}
+	} else if (Math.abs(piece) == KING) {
+		d1 = Math.abs(j1 - y);
+		d2 = Math.abs(i1 - x);
+		if (d1 <= 1 && d2 <= 1) {
+			board[y][x] = BLANK;
+			board[j1][i1] = piece;
+			draw();
+		}
+	}
+}
+
+// For making table clickable.
+
+document.addEventListener("DOMContentLoaded", function() {
+    // Get the table element
+    const table = document.getElementById("mytable");
+
+    // Add event listener to the table
+    table.addEventListener("click", function(event) {
+        // Check if the clicked element is a table cell
+        if (event.target.tagName === "TD") {
+            // Get the clicked cell
+            const clickedCell = event.target;
+            // Get the cell's ID & content
+            const cellID = clickedCell.id;
+			const content = clickedCell.textContent;
+            // Handle the click event (e.g., log the content)
+			
+			if (content != '\u274c')
+				highlight(cellID.substring(0, 1), cellID.substring(2, 3));
+        }
+    });
+});
+
+
+// Draw the board.
+
+function draw() {
+	const white_pieces = [' ', '\u2657', '\u2658', '\u2656', '\u2654'];
+	const black_pieces = [' ', '\u265d', '\u265e', '\u265c'];
+	
+	for(j=0; j<HEIGHT; j++)
+		for(i=0; i<LENGTH; i++)
+			if (board[j][i] != WALL) {
+				x = board[j][i];
+				if (x > 0)
+					u = white_pieces[x];
+				else
+					u = black_pieces[-x];
+					
+				document.getElementById(j + '_' + i).innerHTML = u;
+			}
+			
+	if (board[5][5] == KING)
+		alert("VICTORY!");
+
+}
+
+
+// Reset the puzzle.
+
+function reset_puzzle() {
+	const base = [
+	[WALL,   WALL,   WALL,   WALL,   WALL,   WALL,   WALL,   WALL],
+	[WALL,   WALL,   WALL,   WALL,   WALL,   WALL,   WALL,   WALL],
+	[WALL,   WALL,   KING,   KNIGHT, KNIGHT, KNIGHT, WALL,   WALL],
+	[WALL,   WALL,   ROOK,   ROOK,   ROOK,   ROOK,   WALL,   WALL],
+	[WALL,   WALL,   BISHOP, BISHOP, BISHOP, BISHOP, WALL,   WALL],
+	[WALL,   WALL,   WALL,   WALL,   WALL,   BLANK,  WALL,   WALL],
+	[WALL,   WALL,   WALL,   WALL,   WALL,   WALL,   WALL,   WALL],
+	[WALL,   WALL,   WALL,   WALL,   WALL,   WALL,   WALL,   WALL]
+	];
+	
+	for(j=0; j<HEIGHT; j++)
+		for(i=0; i<LENGTH; i++)
+			board[j][i] = base[j][i];
+
+	draw();
+}
+
+reset_puzzle();
+
+
+</script>	
+	
+</body>
+</html>
