@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>6x3 Table</title>
+    <style>
+        table {
+            border-collapse: collapse;
+        }
+        td, th {
+            border: 1px solid black;
+            padding: 0;
+            width: 150px;
+            height: 150px;
+            text-align: center;
+			font-size: 80pt;
+        }
+        .no-border {
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <table id = "mytable">
+        <tr>
+            <td id = "2_2"></td>
+            <td id = "2_3"></td>
+            <td id = "2_4"></td>
+            <td id = "2_5"></td>
+            <td id = "2_6"></td>
+            <td id = "2_7"></td>
+        </tr>
+        <tr>
+            <td id = "3_2"></td>
+            <td id = "3_3"></td>
+            <td id = "3_4"></td>
+            <td id = "3_5"></td>
+            <td id = "3_6"></td>
+            <td id = "3_7"></td>
+        </tr>
+        <tr>
+            <td id = "4_2">&#x274c</td>
+            <td id = "4_3">&#x274c</td>
+            <td id = "4_4">&#x274c</td>
+            <td id = "4_5">&#x274c</td>
+            <td id = "4_6"></td>
+            <td id = "4_7"></td>
+        </tr>
+    </table>
+	
+	<p>
+	<button style="font-size: 30px" type="button">Reset</button>
+	
+	</p>
+<script>
+
+const BLANK = 0;
+const BISHOP = 1;
+const KNIGHT = 2;
+const ROOK = 3;
+const WALL = 255;
+
+const LENGTH = 10;
+const HEIGHT = 7;
+
+board = []
+for (let j = 0; j < HEIGHT; j++) {
+    board[j] = [];
+    for (let i = 0; i < LENGTH; i++) {
+        board[j][i] = 0;
+    }
+}
+
+// Hightlight cell clicked.
+
+function highlight(y, x) {
+	for(j=0; j<HEIGHT; j++)
+		for(i=0; i<LENGTH; i++)
+			if (board[j][i] == BLANK) {
+				j1 = j;
+				i1 = i;
+			}
+			
+	piece = board[y][x];
+	if (Math.abs(piece) == BISHOP) {
+		if (Math.abs(j1 - y) == 1 && Math.abs(i1 - x) == 1) {
+			board[y][x] = BLANK;
+			board[j1][i1] = piece;
+			draw();
+		}	
+	} else if (Math.abs(piece) == ROOK) {
+		if (Math.abs(j1 - y) + Math.abs(i1 - x) == 1) {
+			board[y][x] = BLANK;
+			board[j1][i1] = piece;
+			draw();
+		}
+	} else if (Math.abs(piece) == KNIGHT) {
+		d1 = Math.abs(j1 - y);
+		d2 = Math.abs(i1 - x);
+		if (d1 + d2 == 3 && d1 > 0 && d2 > 0) {
+			board[y][x] = BLANK;
+			board[j1][i1] = piece;
+			draw();
+		}
+	}
+				
+}
+
+// For making table clickable.
+
+document.addEventListener("DOMContentLoaded", function() {
+    // Get the table element
+    const table = document.getElementById("mytable");
+
+    // Add event listener to the table
+    table.addEventListener("click", function(event) {
+        // Check if the clicked element is a table cell
+        if (event.target.tagName === "TD") {
+            // Get the clicked cell
+            const clickedCell = event.target;
+            // Get the cell's ID & content
+            const cellID = clickedCell.id;
+			const content = clickedCell.textContent;
+            // Handle the click event (e.g., log the content)
+			
+			if (content != '\u274c')
+				highlight(cellID.substring(0, 1), cellID.substring(2, 3));
+        }
+    });
+});
+
+function move_nothing(x, y) {
+	return []
+}
+
+function move_bishop(x, y) {
+	ans = []
+	x1 = x+1;
+	y1 = y+1;
+	while (board[y1][x1] == 0) {
+		ans.push([x1, y1]);
+		x1++;
+		y1++;
+	}
+	x1 = x+1;
+	y1 = y-1;
+	while (board[y1][x1] == 0) {
+		ans.push([x1, y1]);
+		x1++;
+		y1--;
+	}
+	x1 = x-1;
+	y1 = y+1;
+	while (board[y1][x1] == 0) {
+		ans.push([x1, y1]);
+		x1--;
+		y1++;
+	}
+	x1 = x-1;
+	y1 = y-1;
+	while (board[y1][x1] == 0) {
+		ans.push([x1, y1]);
+		x1--;
+		y1--;
+	}
+	return ans
+}
+
+
+// Draw the board.
+
+function draw() {
+	const white_pieces = [' ', '\u2657', '\u2658', '\u2656'];
+	const black_pieces = [' ', '\u265d', '\u265e', '\u265c'];
+	
+	for(j=0; j<HEIGHT; j++)
+		for(i=0; i<LENGTH; i++)
+			if (board[j][i] != WALL) {
+				x = board[j][i];
+				if (x > 0)
+					u = white_pieces[x];
+				else
+					u = black_pieces[-x];
+					
+				document.getElementById(j + '_' + i).innerHTML = u;
+			}
+			
+	if (board[4][7] == -KNIGHT) 
+		alert("VICTORY!");
+
+}
+
+
+// Reset the puzzle.
+
+function reset_puzzle() {
+	const base = [
+	[WALL,   WALL,   WALL,   WALL,   WALL,   WALL,   WALL,   WALL,   WALL,   WALL],
+	[WALL,   WALL,   WALL,   WALL,   WALL,   WALL,   WALL,   WALL,   WALL,   WALL],
+	[WALL,   WALL,  -KNIGHT, BISHOP, BISHOP, BISHOP, BISHOP, ROOK,   WALL,   WALL],
+	[WALL,   WALL,   KNIGHT, KNIGHT, KNIGHT, KNIGHT, ROOK,   ROOK,   WALL,   WALL],
+	[WALL,   WALL,   WALL,   WALL,   WALL,   WALL,   ROOK,   BLANK,  WALL,   WALL],
+	[WALL,   WALL,   WALL,   WALL,   WALL,   WALL,   WALL,   WALL,   WALL,   WALL],
+	[WALL,   WALL,   WALL,   WALL,   WALL,   WALL,   WALL,   WALL,   WALL,   WALL]
+	];
+	
+	for(j=0; j<HEIGHT; j++)
+		for(i=0; i<LENGTH; i++)
+			board[j][i] = base[j][i];
+
+	draw();
+}
+
+
+function move(x, y) {
+   piece = board[y][x];
+   [move_nothing, move_bishop, move_knight, move_rook][piece](board, x, y);
+}
+
+
+
+
+
+reset_puzzle();
+
+
+</script>	
+	
+</body>
+</html>
