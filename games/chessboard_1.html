@@ -133,44 +133,6 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 });
 
-function move_nothing(x, y) {
-	return []
-}
-
-function move_bishop(x, y) {
-	ans = []
-	x1 = x+1;
-	y1 = y+1;
-	while (board[y1][x1] == 0) {
-		ans.push([x1, y1]);
-		x1++;
-		y1++;
-	}
-	x1 = x+1;
-	y1 = y-1;
-	while (board[y1][x1] == 0) {
-		ans.push([x1, y1]);
-		x1++;
-		y1--;
-	}
-	x1 = x-1;
-	y1 = y+1;
-	while (board[y1][x1] == 0) {
-		ans.push([x1, y1]);
-		x1--;
-		y1++;
-	}
-	x1 = x-1;
-	y1 = y-1;
-	while (board[y1][x1] == 0) {
-		ans.push([x1, y1]);
-		x1--;
-		y1--;
-	}
-	return ans
-}
-
-
 // Draw the board.
 
 function draw() {
@@ -191,9 +153,7 @@ function draw() {
 			
 	if (board[4][7] == -KNIGHT) 
 		alert("VICTORY!");
-
 }
-
 
 // Reset the puzzle.
 
@@ -215,19 +175,7 @@ function reset_puzzle() {
 	draw();
 }
 
-
-function move(x, y) {
-   piece = board[y][x];
-   [move_nothing, move_bishop, move_knight, move_rook][piece](board, x, y);
-}
-
-
-
-
-
 reset_puzzle();
-
-
 </script>	
 	
 </body>
